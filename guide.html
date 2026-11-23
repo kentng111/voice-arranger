@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>使いかた — Voice Arranger</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f172a'/%3E%3Cpath d='M6 16h2M11 11v10M16 6v20M21 10v12M26 15v2' stroke='%2360a5fa' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .guide { max-width: 760px; }
+    .guide h2 { font-size: 18px; margin: 0 0 10px; }
+    .guide h3 { font-size: 15px; margin: 16px 0 6px; }
+    .guide p, .guide li { font-size: 15px; }
+    .guide ol, .guide ul { padding-left: 1.4em; margin: 6px 0; }
+    .guide li { margin: 4px 0; }
+    .guide kbd { border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 13px; background: #f9fafb; }
+    .guide .tip { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 10px 14px; font-size: 14px; margin: 10px 0; }
+    .guide dt { font-weight: bold; margin-top: 12px; }
+    .guide dd { margin: 4px 0 0 0; font-size: 15px; }
+    .guide .open { display: inline-block; margin-top: 6px; }
+    .guide table { border-collapse: collapse; font-size: 14px; width: 100%; }
+    .guide td, .guide th { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap guide">
+      <h1>Voice Arranger の使いかた</h1>
+      <p>別々に録音した声をそろえて、長い間を詰め、音量を整えるツールです。</p>
+    </div>
+  </header>
+
+  <main class="wrap guide" style="padding-top:18px">
+
+    <section class="card">
+      <h2>はじめに</h2>
+      <ul>
+        <li><b>Chrome</b> か <b>Edge</b> で開いてください（Mac・Windows どちらでも使えます）。Safari では保存がうまくいかないことがあります。</li>
+        <li>インストールは不要です。音声は<b>自分の PC の中だけ</b>で処理され、外部には送られません。</li>
+        <li>1時間 × 3人ぶんで、メモリを 1〜2GB ほど使います。ほかの重いアプリは閉じておくと安心です。</li>
+      </ul>
+      <a class="btn primary open" href="./">ツールを開く →</a>
+    </section>
+
+    <section class="card">
+      <h2>録音するときのお願い</h2>
+      <ol>
+        <li>各自が<b>自分の声を手元で録音</b>します（iPhone のボイスメモなどで OK）。通話はイヤホンで聞くと、ほかの人の声が混ざりにくくなります。</li>
+        <li>iPhone のボイスメモは、設定の「音質」を<b>「圧縮」</b>にしてください（「ロスレス」だと読み込めません）。</li>
+        <li>録音の開始・終了のタイミングはそろっていなくて大丈夫です。ツールが会話から自動で合わせます。</li>
+        <li>録音したファイルを、編集する人に送ります（AirDrop、Google ドライブなど）。</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>編集の手順</h2>
+      <p>画面上の 4 つの手順を、左から順に進めます。</p>
+
+      <h3><span class="num">1</span> 音声を入れる</h3>
+      <ul>
+        <li>全員の録音ファイルを、画面にまとめてドラッグします（または「ファイルを選ぶ」）。</li>
+        <li>必要なら話者の名前を直して、<b>「自動で整える」</b>を押します。数十秒〜数分かかります。</li>
+      </ul>
+
+      <h3><span class="num">2</span> 聞いて直す</h3>
+      <ul>
+        <li><b>「▶ 再生」</b>で聞いてみます。<kbd>スペース</kbd> でも再生 / 停止できます。</li>
+        <li>間の詰め方は<b>「控えめ / ふつう / しっかり」</b>から選べます。</li>
+        <li>切りたい所は、波形の上をなぞって選び<b>「切って詰める」</b>（または <kbd>Delete</kbd>）。</li>
+        <li>灰色の帯（詰める間）をクリックすると<b>「切らずに残す」</b>にできます。</li>
+        <li>まちがえたら<b>「↶ 元に戻す」</b>（<kbd>Ctrl</kbd>＋<kbd>Z</kbd>、Mac は <kbd>⌘</kbd>＋<kbd>Z</kbd>）。</li>
+        <li>声がずれて聞こえるときは「声のタイミングがずれているとき」を開いて、開始位置を少しずつ動かします。</li>
+      </ul>
+      <div class="tip">直した内容はブラウザに自動で保存されます。途中で閉じても、同じ音声を入れ直すと「復元する」で続きからできます。</div>
+
+      <h3><span class="num">3</span> 「えー」を取る（やらなくても OK）</h3>
+      <ul>
+        <li><b>「文字起こしを始める」</b>を押します。初回だけ、文字起こしのデータ（約 320MB）をダウンロードします。Wi-Fi で行ってください。</li>
+        <li>色の付いた言葉が「えー」などの候補です。
+          <b style="color:#d97706">橙</b>＝えー・あー（最初から「切る」）、
+          <b style="color:#7c3aed">紫</b>＝あの・その（最初は「残す」）。</li>
+        <li>候補をクリックすると前後が流れます。「切る / 残す」を選んで「次 →」。<kbd>←</kbd> <kbd>→</kbd> で移動、<kbd>Enter</kbd> で切り替えもできます。</li>
+        <li>自動の判断は「提案」です。聞いてみて、残したいものは残してください。</li>
+      </ul>
+      <div class="tip">文字起こしの速さは PC によって大きく変わります。古い PC では時間がかかることがあります。</div>
+
+      <h3><span class="num">4</span> 保存する</h3>
+      <ul>
+        <li>ファイル名を決めて<b>「保存する」</b>→ 保存先のフォルダを選びます。</li>
+        <li>ブラウザが「フォルダへのアクセスを許可しますか？」と聞いてきたら「許可」を選びます。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>できあがるファイル</h2>
+      <table>
+        <tr><th>ファイル</th><th>使いみち</th></tr>
+        <tr><td><code>名前_1_話者名.wav</code> など</td><td>話者ごとの音声。GarageBand などで並べて仕上げるとき用</td></tr>
+        <tr><td><code>名前_mix.wav</code></td><td>全員を混ぜた完成版。このまま配信にも使えます</td></tr>
+        <tr><td><code>名前_transcript.txt</code> / <code>.srt</code></td><td>文字起こし（手順 3 をしたときだけ）。.srt は字幕用</td></tr>
+        <tr><td>そのほか（.csv / .json など）</td><td>カットの記録です。ふだんは使わなくて大丈夫です</td></tr>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>GarageBand で仕上げる</h2>
+      <ol>
+        <li>話者ごとの WAV を、それぞれ<b>別のトラック</b>に入れます。</li>
+        <li>どれも<b>先頭（1小節目の頭）</b>にぴったり置きます。これだけでタイミングがそろいます。</li>
+        <li>iPhone 版では、曲の長さ（セクション）を「自動」にし、取り込んだ音声の「テンポに合わせる」をオフにしてください。</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>困ったとき</h2>
+      <dl>
+        <dt>ファイルを入れても読み込めない</dt>
+        <dd>ボイスメモの「ロスレス」で録音したファイルは読めません。「圧縮」で録り直すか、ほかのアプリで m4a / wav に変換してください。</dd>
+        <dt>声のタイミングが合っていない</dt>
+        <dd>手順 2 の「声のタイミングがずれているとき」で、開始位置を ±0.1 秒ずつ動かして合わせます。会話が短い（数分）と自動で合わせにくくなります。</dd>
+        <dt>途中で止まった・画面が固まった</dt>
+        <dd>メモリ不足のことがあります。ほかのタブやアプリを閉じて、ページを再読み込みしてください。直した内容は「復元する」で戻せます。</dd>
+        <dt>保存先を選ぶ画面が出ない</dt>
+        <dd>Chrome か Edge で開いているか確認してください。</dd>
+        <dt>うまくいかないときに作者へ伝えること</dt>
+        <dd>使ったブラウザ、録音の長さと人数、画面のいちばん下の「処理ログ」を開いた中身をコピーして送ってください。</dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>キーボード操作（覚えなくても使えます）</h2>
+      <table>
+        <tr><td><kbd>スペース</kbd></td><td>再生 / 停止</td></tr>
+        <tr><td><kbd>Delete</kbd></td><td>選んだ範囲を切って詰める</td></tr>
+        <tr><td><kbd>M</kbd></td><td>選んだ範囲の、その人の声だけ消す</td></tr>
+        <tr><td><kbd>Ctrl</kbd>＋<kbd>Z</kbd> / <kbd>Ctrl</kbd>＋<kbd>Y</kbd></td><td>元に戻す / やり直し（Mac は <kbd>⌘</kbd>）</td></tr>
+        <tr><td><kbd>Ctrl</kbd>＋ホイール / <kbd>Shift</kbd>＋ホイール</td><td>拡大縮小 / 左右に移動</td></tr>
+      </table>
+    </section>
+
+  </main>
+
+  <footer class="wrap foot guide">
+    <a href="./">← ツールに戻る</a>
+  </footer>
+</body>
+</html>

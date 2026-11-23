@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voice Arranger — リモート収録の自動編集</title>
+  <meta name="description" content="別々に録音した複数の声をそろえ、長い間を詰め、音量を整えるブラウザツール。音声はPCの外に送られません。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f172a'/%3E%3Cpath d='M6 16h2M11 11v10M16 6v20M21 10v12M26 15v2' stroke='%2360a5fa' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <h1>Voice Arranger <a class="help-link" href="guide.html" target="_blank" rel="noopener">使いかた</a></h1>
+      <p>別々に録音した声をそろえて、長い間を詰め、音量を整えます。音声はこのPCの外に送られません。</p>
+    </div>
+  </header>
+
+  <nav class="stepper wrap" id="stepper" aria-label="手順">
+    <button data-step="0"><span class="num">1</span>音声を入れる</button>
+    <button data-step="1"><span class="num">2</span>聞いて直す</button>
+    <button data-step="2"><span class="num">3</span>「えー」を取る<small>（任意）</small></button>
+    <button data-step="3"><span class="num">4</span>保存する</button>
+  </nav>
+
+  <main class="wrap">
+    <div id="browserWarning" class="notice warn" hidden></div>
+
+    <!-- 1 ------------------------------------------------------------------>
+    <section class="card step" id="stepLoad">
+      <label id="drop" class="drop">
+        <span class="drop-main">録音したファイルを、ここにドラッグ</span>
+        <span class="drop-sub">または</span>
+        <span class="btn primary big">ファイルを選ぶ</span>
+        <input type="file" id="fileInput" multiple accept="audio/*,.m4a,.mp3,.wav,.aac,.flac,.caf" hidden>
+      </label>
+      <ul id="trackList" class="tracks"></ul>
+      <div class="next">
+        <span id="analyzeHint" class="hint"></span>
+        <button id="analyzeBtn" class="btn primary big" disabled>自動で整える →</button>
+      </div>
+      <div class="progress" id="analyzeProgress" hidden><div class="bar"><i></i></div><span class="text"></span></div>
+      <div id="analyzeError" class="notice error" hidden></div>
+    </section>
+
+    <!-- 2 ------------------------------------------------------------------>
+    <section class="card step" id="stepReview" hidden>
+      <div id="restoreBox" class="notice restore" hidden></div>
+      <div id="summary" class="summary"></div>
+
+      <div class="presets">
+        <span class="plabel">間の詰め方</span>
+        <span class="seg" id="pausePreset">
+          <button data-preset="soft">控えめ</button>
+          <button data-preset="normal">ふつう</button>
+          <button data-preset="strong">しっかり</button>
+        </span>
+      </div>
+
+      <div class="timeline">
+        <canvas id="overview" title="クリック・ドラッグでその位置を表示"></canvas>
+        <div id="editor" class="editor"></div>
+        <div class="legend"><span class="sw cut"></span>詰める間　<span class="sw fcut"></span>フィラー　<span class="sw mcut"></span>手で切った所・消した所　<span id="cursorInfo" class="hint"></span></div>
+      </div>
+
+      <details class="more" id="syncBox">
+        <summary>声のタイミングがずれているとき <span id="syncStatus" class="badge"></span></summary>
+        <div class="table-wrap">
+          <table class="sync">
+            <thead>
+              <tr><th>話者</th><th>開始位置</th><th>ずらす（秒）</th><th>自動で合わせた確かさ</th><th>声の拾いやすさ</th><th>時計のズレ</th></tr>
+            </thead>
+            <tbody id="syncRows"></tbody>
+          </table>
+        </div>
+        <div class="row small">
+          <button id="resyncBtn" class="btn">もう一度自動で合わせる</button>
+          <button id="resetSyncBtn" class="btn">手で直す前に戻す</button>
+        </div>
+      </details>
+
+      <details class="more">
+        <summary>細かい設定</summary>
+        <div class="settings">
+          <label>この長さを超える間を詰める
+            <span class="ctl"><input type="range" id="maxPause" min="0.4" max="3" step="0.1"><output id="maxPauseOut"></output></span>
+          </label>
+          <label>詰めた後の間の長さ
+            <span class="ctl"><input type="range" id="targetPause" min="0.2" max="1.5" step="0.05"><output id="targetPauseOut"></output></span>
+          </label>
+          <label>話していない時の音量（雑音や、ほかの人の声の漏れを下げる）
+            <span class="ctl"><input type="range" id="gateDb" min="-30" max="0" step="1"><output id="gateDbOut"></output></span>
+          </label>
+        </div>
+      </details>
+
+      <div class="next">
+        <button class="btn" data-go="0">← 戻る</button>
+        <span class="sp"></span>
+        <button class="btn" data-go="3">保存へ進む</button>
+        <button class="btn primary big" data-go="2">次へ：「えー」を取る →</button>
+      </div>
+    </section>
+
+    <!-- 3 ------------------------------------------------------------------>
+    <section class="card step" id="stepTranscript" hidden>
+      <p class="lead">文字起こしをして「えー」「あのー」などを探します。切るか残すかは、聞いてから選べます。</p>
+      <div class="row start">
+        <button id="asrBtn" class="btn primary big">文字起こしを始める</button>
+        <button id="asrCancel" class="btn" hidden>中止</button>
+        <span id="asrNote" class="hint"></span>
+      </div>
+      <div class="progress" id="asrProgress" hidden><div class="bar"><i></i></div><span class="text"></span></div>
+      <div id="asrError" class="notice error" hidden></div>
+
+      <details class="more" id="asrMore">
+        <summary>文字起こしの設定</summary>
+        <div class="row small">
+          <label>モデル <select id="asrModel" aria-label="文字起こしのモデル"></select></label>
+          <label class="btn">保存した文字起こしを読み込む<input type="file" id="transcriptFile" accept=".json,application/json" hidden></label>
+        </div>
+        <p id="asrInfo" class="hint"></p>
+      </details>
+
+      <div id="fillerPanel" hidden>
+        <div id="fillerSummary" class="summary"></div>
+        <div class="bulk">
+          <span class="grp"><span class="fl auto">えー・あー など</span>
+            <button class="btn tiny" data-bulk="auto" data-on="1">すべて切る</button><button class="btn tiny" data-bulk="auto" data-on="0">すべて残す</button></span>
+          <span class="grp"><span class="fl review">あの・その など</span>
+            <button class="btn tiny" data-bulk="review" data-on="1">すべて切る</button><button class="btn tiny" data-bulk="review" data-on="0">すべて残す</button></span>
+          <label class="check"><input type="checkbox" id="onlyFillerRows"> 「えー」のある行だけ</label>
+        </div>
+        <div id="fillerBar" class="fbar">
+          <span id="fillerSelInfo" class="fsel">色の付いた言葉をクリックすると、その前後が流れます。</span>
+          <span class="fbtns">
+            <button class="btn" id="fPrev" title="前の候補（←）">← 前</button>
+            <button class="btn" id="fPlayRaw" title="元の音を再生（スペース）">▶ 元の音</button>
+            <button class="btn" id="fPlayEdit" title="切った後の音を再生（E）">▶ 切った後</button>
+            <span class="seg" id="fChoice">
+              <button id="fCut" title="切る（Enter で切り替え）">切る</button><button id="fKeep" title="残す（Enter で切り替え）">残す</button>
+            </span>
+            <button class="btn evalonly" id="fYes" title="本当にフィラー（Y）">フィラー（Y）</button>
+            <button class="btn evalonly" id="fNo" title="フィラーではない（N）">違う（N）</button>
+            <button class="btn" id="fNext" title="次の候補（→）">次 →</button>
+            <select id="listenMode" class="tinysel" title="声が重なっているときの聞き方">
+              <option value="emphasis">その人を大きく</option>
+              <option value="solo">その人だけ</option>
+              <option value="all">全員そのまま</option>
+            </select>
+          </span>
+        </div>
+        <details id="evalBox" class="evalbox" hidden>
+          <summary>正解を付ける（検出の精度を確かめる・評価用）</summary>
+          <ol class="hint steps">
+            <li>範囲を決める（既定は 10分目から5分間）。開いている間は、その範囲の行だけを表示します。</li>
+            <li>候補を1つずつ聞いて、本当にフィラーなら「フィラー（Y）」、違えば「違う（N）」。→ キーで次の候補へ進みます。</li>
+            <li>「範囲を通して聞く」で聞きながら、候補に出ていないフィラーが聞こえたらすぐ「見落とし（A）」を押す（直前の声を自動で拾います。話者が違っていたら 1〜3 キーで直せます）。</li>
+          </ol>
+          <div class="row small">
+            <label>範囲 <input type="number" id="evalFrom" value="10" step="0.5" min="0" class="numin"> 分目から</label>
+            <label><input type="number" id="evalLen" value="5" step="1" min="1" class="numin"> 分間</label>
+            <button class="btn tiny" id="evalPlay">▶ 範囲を通して聞く</button>
+            <button class="btn tiny" id="evalStop">■ 止める</button>
+            <button class="btn tiny" id="evalAdd" title="直前に聞こえたフィラーを追加（A）">＋ 見落とし（A）</button>
+            <span id="evalPos" class="hint"></span>
+          </div>
+          <div id="evalResult" class="evalres"></div>
+        </details>
+        <div id="transcriptView" class="transcript" tabindex="0"></div>
+        <details class="more">
+          <summary>細かい設定</summary>
+          <div class="settings">
+            <label>「えー」を切った後に残す間
+              <span class="ctl"><input type="range" id="fillerGap" min="0.1" max="0.5" step="0.05"><output id="fillerGapOut"></output></span>
+            </label>
+          </div>
+        </details>
+      </div>
+
+      <div class="next">
+        <button class="btn" data-go="1">← 戻る</button>
+        <span class="sp"></span>
+        <button class="btn primary big" data-go="3">次へ：保存する →</button>
+      </div>
+    </section>
+
+    <!-- 4 ------------------------------------------------------------------>
+    <section class="card step" id="stepExport" hidden>
+      <label class="fname">ファイル名 <input type="text" id="baseName" spellcheck="false"></label>
+      <div class="row start">
+        <button id="exportBtn" class="btn primary big">保存する</button>
+        <span id="exportHint" class="hint"></span>
+      </div>
+      <div class="progress" id="exportProgress" hidden><div class="bar"><i></i></div><span class="text"></span></div>
+      <div id="exportResult"></div>
+
+      <details class="more" id="previewBox">
+        <summary>保存する前に、全体を通して聞く</summary>
+        <div class="row small">
+          <select id="previewMode">
+            <option value="edited">編集後</option>
+            <option value="synced">そろえただけ（カットなし）</option>
+          </select>
+          <button id="previewBtn" class="btn">聞く準備をする</button>
+          <span class="hint">確認用の軽い音質です。</span>
+        </div>
+        <div class="progress" id="previewProgress" hidden><div class="bar"><i></i></div><span class="text"></span></div>
+        <audio id="player" controls preload="auto" hidden></audio>
+        <p id="previewStale" class="notice warn" hidden>編集が変わりました。「聞く準備をする」をもう一度押すと反映されます。</p>
+      </details>
+
+      <details class="more">
+        <summary>保存する内容を選ぶ</summary>
+        <div class="form">
+          <label class="check"><input type="checkbox" id="exportStems" checked> 話者ごとの音声（GarageBand などで並べて仕上げる用）</label>
+          <label class="check"><input type="checkbox" id="exportMix" checked> 全員を混ぜた完成版</label>
+          <label class="check"><input type="checkbox" id="exportTranscript" checked disabled> 文字起こし（字幕 srt / vtt と txt）</label>
+          <label>仕上がりの音量
+            <select id="targetLufs">
+              <option value="-14">大きめ（-14 LUFS）</option>
+              <option value="-16">ふつう（-16 LUFS・ポッドキャスト標準）</option>
+              <option value="-19">控えめ（-19 LUFS）</option>
+            </select>
+          </label>
+          <label>話者ごとの音声の形式
+            <select id="bitDepth">
+              <option value="16">16bit（ファイルが小さい）</option>
+              <option value="24">24bit（編集の余裕が大きい）</option>
+            </select>
+          </label>
+        </div>
+      </details>
+
+      <div class="next">
+        <button class="btn" data-go="2">← 戻る</button>
+      </div>
+    </section>
+
+    <details class="card log">
+      <summary>処理ログ</summary>
+      <pre id="log"></pre>
+    </details>
+  </main>
+
+  <footer class="wrap foot">
+    Voice Arranger（2026-11-23 版） · 対応ブラウザ: Chrome / Edge（Mac・Windows） · <a href="guide.html" target="_blank" rel="noopener">使いかた</a>
+  </footer>
+
+  <script>
+    if (location.protocol === 'file:') {
+      document.addEventListener('DOMContentLoaded', function () {
+        var w = document.getElementById('browserWarning');
+        w.hidden = false;
+        w.textContent = 'このファイルを直接開いても動きません。共有されたURL（https://～）から開いてください。手元で動かすときは serve.bat（Windows）を使います。';
+      });
+    }
+  </script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "voice-arranger", "runtimeExecutable": "node", "runtimeArgs": ["tools/serve.mjs", "8000"], "port": 8000 },
+    { "name": "voice-arranger-8010", "runtimeExecutable": "node", "runtimeArgs": ["tools/serve.mjs", "8010"], "port": 8010 }
+  ]
+}

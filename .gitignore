@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+Thumbs.db
+tests/out*/
+*.crswap
+data/
+.claude/settings.local.json
